@@ -1,0 +1,7 @@
+keys:
+  default: ~/.ssh/id_rsa
+  work: ~/.ssh/id_work
+configs:
+  - hostname: somehostname
+    remote_regex: .*mycompany.*
+    key: work

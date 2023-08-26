@@ -8,8 +8,9 @@ use std::str;
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Config {
-    hostname: String,
-    remote_regex: String,
+    hostname: Option<String>,
+    remote_regex: Option<String>,
+    local_path_regex: Option<String>,
     key: String,
 }
 
@@ -56,22 +57,41 @@ fn github_remote() -> String {
     return str::from_utf8(&output.stdout[..]).unwrap().to_string();
 }
 
-fn hostname() -> String {
-    let output = Command::new("hostname").output().unwrap();
+fn run_command(cmd: &str) -> String {
+    let output = Command::new(cmd).output().unwrap();
     return str::from_utf8(&output.stdout[..])
         .unwrap()
         .trim_end()
         .to_string();
 }
 
+fn hostname() -> String {
+    return run_command("hostname");
+}
+
+fn local_path() -> String {
+    return run_command("pwd");
+}
+
 fn config_matches(config: &Config, state: &State) -> bool {
-    let re = Regex::new(&config.remote_regex).unwrap();
-    if !re.is_match(&state.git_remote_v) {
+    if config.remote_regex.is_some() {
+        let remote_regex = config.remote_regex.as_ref().unwrap();
+        let re = Regex::new(remote_regex).unwrap();
+        if !re.is_match(&state.git_remote_v) {
+            return false;
+        }
+    }
+
+    if config.hostname.is_some() && &state.hostname != config.hostname.as_ref().unwrap() {
         return false;
     }
 
-    if state.hostname != config.hostname {
-        return false;
+    if config.local_path_regex.is_some() {
+        let local_path_regex = config.local_path_regex.as_ref().unwrap();
+        let re = Regex::new(local_path_regex).unwrap();
+        if !re.is_match(&local_path()) {
+            return false;
+        }
     }
 
     return true;

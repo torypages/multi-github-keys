@@ -1,11 +1,11 @@
 [package]
 name = "multi-github-keys"
+description = "Manage multiple github keys."
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-regex = "1.9.3"
-serde = {version="1.0.183", features=["derive"] }
-serde_yaml = "0.9.25"
+clap = {version = "4.4.0", features = ["derive"]}
+regex = "1.9.4"

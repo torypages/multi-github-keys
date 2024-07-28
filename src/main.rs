@@ -6,7 +6,6 @@ use std::process::{self, Command};
 #[derive(Parser, Default, Debug)]
 #[command(author, version, about, long_about=None)]
 struct Args {
-    /// Stuff in the helplio system
     ssh_key_path: String,
     ssh_clone_string: Option<String>,
 }
@@ -57,6 +56,7 @@ fn folder_from_ssh_clone_string(ssh_clone_string: &String) -> String {
 fn main() {
     let args: Args = Args::parse();
     let ssh_command = format!("ssh -i {}", args.ssh_key_path);
+    ssh_add(&args.ssh_key_path);
     if args.ssh_clone_string.is_some() {
         git_clone(&ssh_command, &args.ssh_clone_string.clone().unwrap());
         let cloned_folder = folder_from_ssh_clone_string(&args.ssh_clone_string.unwrap());
@@ -64,5 +64,4 @@ fn main() {
         let _ = env::set_current_dir(Path::new(&new_path_str));
     }
     set_ssh_command(&ssh_command);
-    ssh_add(&args.ssh_key_path);
 }

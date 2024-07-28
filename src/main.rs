@@ -1,10 +1,8 @@
 use clap::Parser;
 use regex::Regex;
-// use std::fs::File;
+use std::env;
 use std::path::Path;
 use std::process::{self, Command};
-use std::{str, env};
-
 #[derive(Parser, Default, Debug)]
 #[command(author, version, about, long_about=None)]
 struct Args {
@@ -26,6 +24,15 @@ fn set_ssh_command(ssh_command: &String) {
         .expect("Could not set sshCommand");
     let _ = o.wait();
 }
+
+fn ssh_add(ssh_key: &String) {
+    let mut o = Command::new("ssh-add")
+        .arg(ssh_key)
+        .spawn()
+        .expect("Could not add ssh key");
+    let _ = o.wait();
+}
+
 fn git_clone(ssh_command: &String, ssh_clone_string: &String) {
     let mut o = Command::new("git")
         .env("GIT_SSH_COMMAND", ssh_command)
@@ -38,7 +45,13 @@ fn git_clone(ssh_command: &String, ssh_clone_string: &String) {
 
 fn folder_from_ssh_clone_string(ssh_clone_string: &String) -> String {
     let re = Regex::new(r"^.*/(.*).git$").unwrap();
-    return re.captures(ssh_clone_string).unwrap().get(1).unwrap().as_str().to_string();
+    return re
+        .captures(ssh_clone_string)
+        .unwrap()
+        .get(1)
+        .unwrap()
+        .as_str()
+        .to_string();
 }
 
 fn main() {
@@ -51,4 +64,5 @@ fn main() {
         let _ = env::set_current_dir(Path::new(&new_path_str));
     }
     set_ssh_command(&ssh_command);
+    ssh_add(&args.ssh_key_path);
 }
